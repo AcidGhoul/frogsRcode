@@ -1,0 +1,758 @@
+library(unmarked)
+spmf_data <- readRDS("spmf_unmarked.RData")
+summary(spmf_data)
+
+#2 - Correlation
+
+library(lares)
+
+corr(obsCovs(spmf_data))
+corr(siteCovs(spmf_data))
+
+m0<-occu(formula=~1~1,data=spmf_data)
+
+# 1-covariate models
+md1 <- occu(~ had_rained ~ 1, data = spmf_data)
+md2 <- occu(~ humidity ~ 1, data = spmf_data)
+md3 <- occu(~ night ~ 1, data = spmf_data)
+md4 <- occu(~ temperature ~ 1, data = spmf_data)
+md5 <- occu(~ was_raining ~ 1, data = spmf_data)
+md6 <- occu(~ wind_speed ~ 1, data = spmf_data)
+
+# 2-covariate models
+#first set are had_rained with all the other detection covariates
+md7  <- occu(~ had_rained + humidity ~ 1, data = spmf_data)
+md8  <- occu(~ had_rained + night ~ 1, data = spmf_data)
+md9  <- occu(~ had_rained + temperature ~ 1, data = spmf_data)
+md10 <- occu(~ had_rained + was_raining ~ 1, data = spmf_data)
+md11 <- occu(~ had_rained + wind_speed ~ 1, data = spmf_data)
+
+#second set is humidity with all the variables THAT IT HASN'T BEEN WITH YET
+#This is most easily made by copying the all but the first row from the set above and replacing had_rained with humidity
+md12 <- occu(~ humidity + night ~ 1, data = spmf_data)
+md13 <- occu(~ humidity + temperature ~ 1, data = spmf_data)
+md14 <- occu(~ humidity + was_raining ~ 1, data = spmf_data)
+md15 <- occu(~ humidity + wind_speed ~ 1, data = spmf_data)
+
+#third set is night with all variables it hasn't been with yet; copy all lines except the first one in block above, replace humidity with night. Etc.
+md16 <- occu(~ night + temperature ~ 1, data = spmf_data)
+md17 <- occu(~ night + was_raining ~ 1, data = spmf_data)
+md18 <- occu(~ night + wind_speed ~ 1, data = spmf_data)
+md19 <- occu(~ temperature + was_raining ~ 1, data = spmf_data)
+md20 <- occu(~ temperature + wind_speed ~ 1, data = spmf_data)
+md21 <- occu(~ was_raining + wind_speed ~ 1, data = spmf_data)
+
+# 3-covariate models
+md22 <- occu(~ had_rained + humidity + night ~ 1, data = spmf_data)
+md23 <- occu(~ had_rained + humidity + temperature ~ 1, data = spmf_data)
+md24 <- occu(~ had_rained + humidity + was_raining ~ 1, data = spmf_data)
+md25 <- occu(~ had_rained + humidity + wind_speed ~ 1, data = spmf_data)
+md26 <- occu(~ had_rained + night + temperature ~ 1, data = spmf_data)
+md27 <- occu(~ had_rained + night + was_raining ~ 1, data = spmf_data)
+md28 <- occu(~ had_rained + night + wind_speed ~ 1, data = spmf_data)
+md29 <- occu(~ had_rained + temperature + was_raining ~ 1, data = spmf_data)
+md30 <- occu(~ had_rained + temperature + wind_speed ~ 1, data = spmf_data)
+md31 <- occu(~ had_rained + was_raining + wind_speed ~ 1, data = spmf_data)
+md32 <- occu(~ humidity + night + temperature ~ 1, data = spmf_data)
+md33 <- occu(~ humidity + night + was_raining ~ 1, data = spmf_data)
+md34 <- occu(~ humidity + night + wind_speed ~ 1, data = spmf_data)
+md35 <- occu(~ humidity + temperature + was_raining ~ 1, data = spmf_data)
+md36 <- occu(~ humidity + temperature + wind_speed ~ 1, data = spmf_data)
+md37 <- occu(~ humidity + was_raining + wind_speed ~ 1, data = spmf_data)
+md38 <- occu(~ night + temperature + was_raining ~ 1, data = spmf_data)
+md39 <- occu(~ night + temperature + wind_speed ~ 1, data = spmf_data)
+md40 <- occu(~ night + was_raining + wind_speed ~ 1, data = spmf_data)
+md41 <- occu(~ temperature + was_raining + wind_speed ~ 1, data = spmf_data)
+
+#model ranking
+
+spmf_models_ob<-fitList('md1'=md1,
+                       'md2'=md2,
+                       'md3'=md3,
+                       'md4'=md4,
+                       'md5'=md5,
+                       'md6'=md6,
+                       'md7'=md7,
+                       'md8'=md8,
+                       'md9'=md9,
+                       'md10'=md10,
+                       'md11'=md11,
+                       'md12'=md12,
+                       'md13'=md13,
+                       'md14'=md14,
+                       'md15'=md15,
+                       'md16'=md16,
+                       'md17'=md17,
+                       'md18'=md18,
+                       'md19'=md19,
+                       'md20'=md20,
+                       'md21'=md21,
+                       'md22'=md22,
+                       'md23'=md23,
+                       'md24'=md24,
+                       'md25'=md25,
+                       'md26'=md26,
+                       'md27'=md27,
+                       'md28'=md28,
+                       'md29'=md29,
+                       'md30'=md30,
+                       'md31'=md31,
+                       'md32'=md32,
+                       'md33'=md33,
+                       'md34'=md34,
+                       'md35'=md35,
+                       'md36'=md36,
+                       'md37'=md37,
+                       'md38'=md38,
+                       'md39'=md39,
+                       'md40'=md40,
+                       'md41'=md41)
+
+spmf_aictab_ob<-modSel(spmf_models_ob)
+spmf_aictab_ob
+
+spmf_aictable_ob<-as(spmf_aictab_ob, "data.frame")[,c("model", "formula", "nPars", "n", "AIC", "delta", "AICwt", "cumltvWt")]
+spmf_aictable_ob<-data.frame(spmf_aictable_ob[,1:3], round(spmf_aictable_ob[,4:7],2 ))
+write.csv(spmf_aictable_ob, "spmf_aictable_ob.csv" , row.names = FALSE)
+
+
+#occupancy models
+
+#1-covariate
+
+m1 <- occu(~ 1 ~ fringing_veg, data = spmf_data)
+m2 <- occu(~ 1 ~ mature_trees_within30m, data = spmf_data)
+m3 <- occu(~ 1 ~ aquatic_veg, data = spmf_data)
+m4 <- occu(~ 1 ~ wt_roadkms_per_km2, data = spmf_data)
+m5 <- occu(~ 1 ~ pct_wetland_cover, data = spmf_data)
+m6 <- occu(~ 1 ~ wetland_edge_km, data = spmf_data)
+m7 <- occu(~ 1 ~ stream, data = spmf_data)
+m8 <- occu(~ 1 ~ fish, data = spmf_data)
+
+#2-covariate
+m9 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m, data = spmf_data)
+m10 <- occu(~ 1 ~ fringing_veg + aquatic_veg, data = spmf_data)
+m11 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2, data = spmf_data)
+m12 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover, data = spmf_data)
+m13 <- occu(~ 1 ~ fringing_veg + wetland_edge_km, data = spmf_data)
+m14 <- occu(~ 1 ~ fringing_veg + stream, data = spmf_data)
+m15 <- occu(~ 1 ~ fringing_veg + fish, data = spmf_data)
+m16 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg, data = spmf_data)
+m17 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2, data = spmf_data)
+m18 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover, data = spmf_data)
+m19 <- occu(~ 1 ~ mature_trees_within30m + wetland_edge_km, data = spmf_data)
+m20 <- occu(~ 1 ~ mature_trees_within30m + stream, data = spmf_data)
+m21 <- occu(~ 1 ~ mature_trees_within30m + fish, data = spmf_data)
+m22 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2, data = spmf_data)
+m23 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover, data = spmf_data)
+m24 <- occu(~ 1 ~ aquatic_veg + wetland_edge_km, data = spmf_data)
+m25 <- occu(~ 1 ~ aquatic_veg + stream, data = spmf_data)
+m26 <- occu(~ 1 ~ aquatic_veg + fish, data = spmf_data)
+m27 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover, data = spmf_data)
+m28 <- occu(~ 1 ~ wt_roadkms_per_km2 + wetland_edge_km, data = spmf_data)
+m29 <- occu(~ 1 ~ wt_roadkms_per_km2 + stream, data = spmf_data)
+m30 <- occu(~ 1 ~ wt_roadkms_per_km2 + fish, data = spmf_data)
+m31 <- occu(~ 1 ~ pct_wetland_cover + wetland_edge_km, data = spmf_data)
+m32 <- occu(~ 1 ~ pct_wetland_cover + stream, data = spmf_data)
+m33 <- occu(~ 1 ~ pct_wetland_cover + fish, data = spmf_data)
+m34 <- occu(~ 1 ~ wetland_edge_km + stream, data = spmf_data)
+m35 <- occu(~ 1 ~ wetland_edge_km + fish, data = spmf_data)
+m36 <- occu(~ 1 ~ stream + fish, data = spmf_data)
+
+#3-covariate
+m37 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + aquatic_veg, data = spmf_data)
+m38 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + wt_roadkms_per_km2, data = spmf_data)
+m39 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + pct_wetland_cover, data = spmf_data)
+m40 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + wetland_edge_km, data = spmf_data)
+m41 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + stream, data = spmf_data)
+m42 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + fish, data = spmf_data)
+m43 <- occu(~ 1 ~ fringing_veg + aquatic_veg + wt_roadkms_per_km2, data = spmf_data)
+m44 <- occu(~ 1 ~ fringing_veg + aquatic_veg + pct_wetland_cover, data = spmf_data)
+m45 <- occu(~ 1 ~ fringing_veg + aquatic_veg + wetland_edge_km, data = spmf_data)
+m46 <- occu(~ 1 ~ fringing_veg + aquatic_veg + stream, data = spmf_data)
+m47 <- occu(~ 1 ~ fringing_veg + aquatic_veg + fish, data = spmf_data)
+m48 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + pct_wetland_cover, data = spmf_data)
+m49 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + wetland_edge_km, data = spmf_data)
+m50 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + stream, data = spmf_data)
+m51 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + fish, data = spmf_data)
+m52 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover + wetland_edge_km, data = spmf_data)
+m53 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover + stream, data = spmf_data)
+m54 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover + fish, data = spmf_data)
+m55 <- occu(~ 1 ~ fringing_veg + wetland_edge_km + stream, data = spmf_data)
+m56 <- occu(~ 1 ~ fringing_veg + wetland_edge_km + fish, data = spmf_data)
+m57 <- occu(~ 1 ~ fringing_veg + stream + fish, data = spmf_data)
+m58 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + wt_roadkms_per_km2, data = spmf_data)
+m59 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + pct_wetland_cover, data = spmf_data)
+m60 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + wetland_edge_km, data = spmf_data)
+m61 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + stream, data = spmf_data)
+m62 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + fish, data = spmf_data)
+m63 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + pct_wetland_cover, data = spmf_data)
+m64 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + wetland_edge_km, data = spmf_data)
+m65 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + stream, data = spmf_data)
+m66 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + fish, data = spmf_data)
+m67 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover + wetland_edge_km, data = spmf_data)
+m68 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover + stream, data = spmf_data)
+m69 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover + fish, data = spmf_data)
+m70 <- occu(~ 1 ~ mature_trees_within30m + wetland_edge_km + stream, data = spmf_data)
+m71 <- occu(~ 1 ~ mature_trees_within30m + wetland_edge_km + fish, data = spmf_data)
+m72 <- occu(~ 1 ~ mature_trees_within30m + stream + fish, data = spmf_data)
+m73 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + pct_wetland_cover, data = spmf_data)
+m74 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + wetland_edge_km, data = spmf_data)
+m75 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + stream, data = spmf_data)
+m76 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + fish, data = spmf_data)
+m77 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover + wetland_edge_km, data = spmf_data)
+m78 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover + stream, data = spmf_data)
+m79 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover + fish, data = spmf_data)
+m80 <- occu(~ 1 ~ aquatic_veg + wetland_edge_km + stream, data = spmf_data)
+m81 <- occu(~ 1 ~ aquatic_veg + wetland_edge_km + fish, data = spmf_data)
+m82 <- occu(~ 1 ~ aquatic_veg + stream + fish, data = spmf_data)
+m83 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover + wetland_edge_km, data = spmf_data)
+m84 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover + stream, data = spmf_data)
+m85 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover + fish, data = spmf_data)
+m86 <- occu(~ 1 ~ wt_roadkms_per_km2 + wetland_edge_km + stream, data = spmf_data)
+m87 <- occu(~ 1 ~ wt_roadkms_per_km2 + wetland_edge_km + fish, data = spmf_data)
+m88 <- occu(~ 1 ~ wt_roadkms_per_km2 + stream + fish, data = spmf_data)
+m89 <- occu(~ 1 ~ pct_wetland_cover + wetland_edge_km + stream, data = spmf_data)
+m90 <- occu(~ 1 ~ pct_wetland_cover + wetland_edge_km + fish, data = spmf_data)
+m91 <- occu(~ 1 ~ pct_wetland_cover + stream + fish, data = spmf_data)
+m92 <- occu(~ 1 ~ wetland_edge_km + stream + fish, data = spmf_data)
+
+spmf_models_site <- fitList('m1' = m1,
+                           'm2' = m2,
+                           'm3' = m3,
+                           'm4' = m4,
+                           'm5' = m5,
+                           'm6' = m6,
+                           'm7' = m7,
+                           'm8' = m8,
+                           'm9' = m9,
+                           'm10' = m10,
+                           'm11' = m11,
+                           'm12' = m12,
+                           'm13' = m13,
+                           'm14' = m14,
+                           'm15' = m15,
+                           'm16' = m16,
+                           'm17' = m17,
+                           'm18' = m18,
+                           'm19' = m19,
+                           'm20' = m20,
+                           'm21' = m21,
+                           'm22' = m22,
+                           'm23' = m23,
+                           'm24' = m24,
+                           'm25' = m25,
+                           'm26' = m26,
+                           'm27' = m27,
+                           'm28' = m28,
+                           'm29' = m29,
+                           'm30' = m30,
+                           'm31' = m31,
+                           'm32' = m32,
+                           'm33' = m33,
+                           'm34' = m34,
+                           'm35' = m35,
+                           'm36' = m36,
+                           'm37' = m37,
+                           'm38' = m38,
+                           'm39' = m39,
+                           'm40' = m40,
+                           'm41' = m41,
+                           'm42' = m42,
+                           'm43' = m43,
+                           'm44' = m44,
+                           'm45' = m45,
+                           'm46' = m46,
+                           'm47' = m47,
+                           'm48' = m48,
+                           'm49' = m49,
+                           'm50' = m50,
+                           'm51' = m51,
+                           'm52' = m52,
+                           'm53' = m53,
+                           'm54' = m54,
+                           'm55' = m55,
+                           'm56' = m56,
+                           'm57' = m57,
+                           'm58' = m58,
+                           'm59' = m59,
+                           'm60' = m60,
+                           'm61' = m61,
+                           'm62' = m62,
+                           'm63' = m63,
+                           'm64' = m64,
+                           'm65' = m65,
+                           'm66' = m66,
+                           'm67' = m67,
+                           'm68' = m68,
+                           'm69' = m69,
+                           'm70' = m70,
+                           'm71' = m71,
+                           'm72' = m72,
+                           'm73' = m73,
+                           'm74' = m74,
+                           'm75' = m75,
+                           'm76' = m76,
+                           'm77' = m77,
+                           'm78' = m78,
+                           'm79' = m79,
+                           'm80' = m80,
+                           'm81' = m81,
+                           'm82' = m82,
+                           'm83' = m83,
+                           'm84' = m84,
+                           'm85' = m85,
+                           'm86' = m86,
+                           'm87' = m87,
+                           'm88' = m88,
+                           'm89' = m89,
+                           'm90' = m90,
+                           'm91' = m91,
+                           'm92' = m92)
+
+
+spmf_aictab_site<-modSel(spmf_models_site)
+spmf_aictab_site
+
+spmf_aictable_site<-as(spmf_aictab_site, "data.frame")[,c("model", "formula", "nPars", "n", "AIC", "delta", "AICwt", "cumltvWt")]
+spmf_aictable_site<-data.frame(spmf_aictable_site[,1:3], round(spmf_aictable_site[,4:7],2 ))
+write.csv(spmf_aictable_site, "spmf_aictable_site.csv" , row.names = FALSE)
+
+momax <- occu(formula = ~ had_rained + night + humidity + temperature + was_raining + wind_speed+ night  
+              ~ fringing_veg+ mature_trees_within30m + aquatic_veg + wt_roadkms_per_km2 + pct_wetland_cover + stream + fish, data = spmf_data)
+
+#Combined Models
+
+#Site+md22
+m81_22<-occu(~had_rained+humidity+night~aquatic_veg+wetland_edge_km+fish,data=spmf_data)
+m45_22<-occu(~had_rained+humidity+night~fringing_veg+aquatic_veg+wetland_edge_km,data=spmf_data)
+m74_22<-occu(~had_rained+humidity+night~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=spmf_data)
+m56_22<-occu(~had_rained+humidity+night~fringing_veg+wetland_edge_km+fish,data=spmf_data)
+m24_22<-occu(~had_rained+humidity+night~aquatic_veg+wetland_edge_km,data=spmf_data)
+m87_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2+wetland_edge_km+fish,data=spmf_data)
+m60_22<-occu(~had_rained+humidity+night~mature_trees_within30m+aquatic_veg+wetland_edge_km,data=spmf_data)
+m55_22<-occu(~had_rained+humidity+night~fringing_veg+wetland_edge_km+stream,data=spmf_data)
+m80_22<-occu(~had_rained+humidity+night~aquatic_veg+wetland_edge_km+stream,data=spmf_data)
+m79_22<-occu(~had_rained+humidity+night~aquatic_veg+pct_wetland_cover+fish,data=spmf_data)
+m92_22<-occu(~had_rained+humidity+night~wetland_edge_km+stream+fish,data=spmf_data)
+m77_22<-occu(~had_rained+humidity+night~aquatic_veg+pct_wetland_cover+wetland_edge_km,data=spmf_data)
+m40_22<-occu(~had_rained+humidity+night~fringing_veg+mature_trees_within30m+wetland_edge_km,data=spmf_data)
+m49_22<-occu(~had_rained+humidity+night~fringing_veg+wt_roadkms_per_km2+wetland_edge_km,data=spmf_data)
+m76_22<-occu(~had_rained+humidity+night~aquatic_veg+wt_roadkms_per_km2+fish,data=spmf_data)
+m35_22<-occu(~had_rained+humidity+night~wetland_edge_km+fish,data=spmf_data)
+m13_22<-occu(~had_rained+humidity+night~fringing_veg+wetland_edge_km,data=spmf_data)
+m71_22<-occu(~had_rained+humidity+night~mature_trees_within30m+wetland_edge_km+fish,data=spmf_data)
+
+#Site+md12
+m81_12<-occu(~humidity+night~aquatic_veg+wetland_edge_km+fish,data=spmf_data)
+m45_12<-occu(~humidity+night~fringing_veg+aquatic_veg+wetland_edge_km,data=spmf_data)
+m74_12<-occu(~humidity+night~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=spmf_data)
+m56_12<-occu(~humidity+night~fringing_veg+wetland_edge_km+fish,data=spmf_data)
+m24_12<-occu(~humidity+night~aquatic_veg+wetland_edge_km,data=spmf_data)
+m87_12<-occu(~humidity+night~wt_roadkms_per_km2+wetland_edge_km+fish,data=spmf_data)
+m60_12<-occu(~humidity+night~mature_trees_within30m+aquatic_veg+wetland_edge_km,data=spmf_data)
+m55_12<-occu(~humidity+night~fringing_veg+wetland_edge_km+stream,data=spmf_data)
+m80_12<-occu(~humidity+night~aquatic_veg+wetland_edge_km+stream,data=spmf_data)
+m79_12<-occu(~humidity+night~aquatic_veg+pct_wetland_cover+fish,data=spmf_data)
+m92_12<-occu(~humidity+night~wetland_edge_km+stream+fish,data=spmf_data)
+m77_12<-occu(~humidity+night~aquatic_veg+pct_wetland_cover+wetland_edge_km,data=spmf_data)
+m40_12<-occu(~humidity+night~fringing_veg+mature_trees_within30m+wetland_edge_km,data=spmf_data)
+m49_12<-occu(~humidity+night~fringing_veg+wt_roadkms_per_km2+wetland_edge_km,data=spmf_data)
+m76_12<-occu(~humidity+night~aquatic_veg+wt_roadkms_per_km2+fish,data=spmf_data)
+m35_12<-occu(~humidity+night~wetland_edge_km+fish,data=spmf_data)
+m13_12<-occu(~humidity+night~fringing_veg+wetland_edge_km,data=spmf_data)
+m71_12<-occu(~humidity+night~mature_trees_within30m+wetland_edge_km+fish,data=spmf_data)
+
+#Site+md33
+m81_33<-occu(~humidity+night+was_raining~aquatic_veg+wetland_edge_km+fish,data=spmf_data)
+m45_33<-occu(~humidity+night+was_raining~fringing_veg+aquatic_veg+wetland_edge_km,data=spmf_data)
+m74_33<-occu(~humidity+night+was_raining~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=spmf_data)
+m56_33<-occu(~humidity+night+was_raining~fringing_veg+wetland_edge_km+fish,data=spmf_data)
+m24_33<-occu(~humidity+night+was_raining~aquatic_veg+wetland_edge_km,data=spmf_data)
+m87_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2+wetland_edge_km+fish,data=spmf_data)
+m60_33<-occu(~humidity+night+was_raining~mature_trees_within30m+aquatic_veg+wetland_edge_km,data=spmf_data)
+m55_33<-occu(~humidity+night+was_raining~fringing_veg+wetland_edge_km+stream,data=spmf_data)
+m80_33<-occu(~humidity+night+was_raining~aquatic_veg+wetland_edge_km+stream,data=spmf_data)
+m79_33<-occu(~humidity+night+was_raining~aquatic_veg+pct_wetland_cover+fish,data=spmf_data)
+m92_33<-occu(~humidity+night+was_raining~wetland_edge_km+stream+fish,data=spmf_data)
+m77_33<-occu(~humidity+night+was_raining~aquatic_veg+pct_wetland_cover+wetland_edge_km,data=spmf_data)
+m40_33<-occu(~humidity+night+was_raining~fringing_veg+mature_trees_within30m+wetland_edge_km,data=spmf_data)
+m49_33<-occu(~humidity+night+was_raining~fringing_veg+wt_roadkms_per_km2+wetland_edge_km,data=spmf_data)
+m76_33<-occu(~humidity+night+was_raining~aquatic_veg+wt_roadkms_per_km2+fish,data=spmf_data)
+m35_33<-occu(~humidity+night+was_raining~wetland_edge_km+fish,data=spmf_data)
+m13_33<-occu(~humidity+night+was_raining~fringing_veg+wetland_edge_km,data=spmf_data)
+m71_33<-occu(~humidity+night+was_raining~mature_trees_within30m+wetland_edge_km+fish,data=spmf_data)
+
+spmf_models_best<-fitList('m81_22'=m81_22,
+                          'm45_22'=m45_22,
+                          'm74_22'=m74_22,
+                          'm56_22'=m56_22,
+                          'm24_22'=m24_22,
+                          'm87_22'=m87_22,
+                          'm60_22'=m60_22,
+                          'm55_22'=m55_22,
+                          'm80_22'=m80_22,
+                          'm79_22'=m79_22,
+                          'm92_22'=m92_22,
+                          'm77_22'=m77_22,
+                          'm40_22'=m40_22,
+                          'm49_22'=m49_22,
+                          'm76_22'=m76_22,
+                          'm35_22'=m35_22,
+                          'm13_22'=m13_22,
+                          'm71_22'=m71_22,
+                          'm81_12'=m81_12,
+                          'm45_12'=m45_12,
+                          'm74_12'=m74_12,
+                          'm56_12'=m56_12,
+                          'm24_12'=m24_12,
+                          'm87_12'=m87_12,
+                          'm60_12'=m60_12,
+                          'm55_12'=m55_12,
+                          'm80_12'=m80_12,
+                          'm79_12'=m79_12,
+                          'm92_12'=m92_12,
+                          'm77_12'=m77_12,
+                          'm40_12'=m40_12,
+                          'm49_12'=m49_12,
+                          'm76_12'=m76_12,
+                          'm35_12'=m35_12,
+                          'm13_12'=m13_12,
+                          'm71_12'=m71_12,
+                          'm81_33'=m81_33,
+                          'm45_33'=m45_33,
+                          'm74_33'=m74_33,
+                          'm56_33'=m56_33,
+                          'm24_33'=m24_33,
+                          'm87_33'=m87_33,
+                          'm60_33'=m60_33,
+                          'm55_33'=m55_33,
+                          'm80_33'=m80_33,
+                          'm79_33'=m79_33,
+                          'm92_33'=m92_33,
+                          'm77_33'=m77_33,
+                          'm40_33'=m40_33,
+                          'm49_33'=m49_33,
+                          'm76_33'=m76_33,
+                          'm35_33'=m35_33,
+                          'm13_33'=m13_33,
+                          'm71_33'=m71_33)
+
+spmf_aictab_best<-modSel(spmf_models_best)
+spmf_aictab_best
+
+spmf_aictable_best<-as(spmf_aictab_best, "data.frame")[,c("model", "formula", "nPars", "n", "AIC", "delta", "AICwt", "cumltvWt")]
+spmf_aictable_best<-data.frame(spmf_aictable_best[,1:3], round(spmf_aictable_best[,4:7],2 ))
+write.csv(spmf_aictable_best, "spmf_aictable_best.csv" , row.names = FALSE)                          
+
+
+#best models: m81_22,
+#             m45_22 (fringing_veg)
+
+m81_22<-occu(~had_rained+humidity+night~aquatic_veg+wetland_edge_km+fish,data=spmf_data)
+m45_22<-occu(~had_rained+humidity+night~fringing_veg+aquatic_veg+wetland_edge_km,data=spmf_data)
+
+m81_22
+m45_22
+
+#p variables to be tested: 
+    #had_rained
+    #humidity
+    #night
+#psi variables to be tested
+    #aquatic_veg
+    #wetland_edge_km
+    #fish
+    #fringing_veg
+
+#PREDICTIONS####
+
+##**Observation-level Predictions*
+
+###had_rained prediction
+rain_to_pred<-c('had_rained','no_rain')
+
+rain_df<-data.frame(had_rained=rain_to_pred,
+                    humidity=0.7404,
+                    night='night',
+                    temperature=12.74)
+
+pred_det_rain<-predict(m81_22,
+                       type='det',
+                       newdata=rain_df)
+
+pred_rain_results<-cbind(rain_to_pred,pred_det_rain)
+pred_rain_results
+
+#### rain = chance of detection 0.6031919  (0.5504131-0.6536733) [no rain] - 0.6895518 (0.6399302-0.7351651) [had rained]
+
+
+###humidity prediction
+hum_seq<-seq(from=0.09,to=1,length.out=100)
+
+hum_seq_df<-data.frame(humidity=hum_seq,
+                       had_rained='had_rained',
+                       night='night',
+                       temperature=12.74) 
+
+pred_det_hum<-predict(m81_22,
+                      type='det',
+                      newdata=hum_seq_df)
+
+pred_hum_results<-cbind(hum_seq_df,pred_det_hum)
+
+pred_hum_results
+
+#### det. 0.4002088 (0.2357316-0.5907422) [0.09] - 0.7821155 (0.7209630-0.8329710) [1]
+
+
+###night prediction
+night_to_pred<-c('night','day')
+
+night_df<-data.frame(night=night_to_pred,
+                     humidity=0.7404,
+                     had_rained='had_rained',
+                     temperature=12.74)
+
+pred_det_night<-predict(m81_22,
+                        type='det',
+                        newdata=night_df)
+
+pred_night_results<-cbind(night_to_pred,pred_det_night)
+
+pred_night_results
+
+#### det. 0.3168971 (0.2455803-0.3979986) [day] - 0.6895518 (0.6399302-0.7351651) [night]
+
+
+
+##**Site-level Predictions*
+
+###aquatic_veg prediction
+aqveg_seq<-seq(from=0,to=2.9,length.out=100)
+
+aqveg_seq_df<-data.frame(aquatic_veg=aqveg_seq,
+                         fringing_veg=0.4145,
+                         wetland_edge_km=1.6452,
+                         fish='fish') 
+
+pred_det_aqveg<-predict(m81_22,
+                        type='state',
+                        newdata=aqveg_seq_df)
+
+pred_aqveg_results<-cbind(aqveg_seq_df,pred_det_aqveg)
+
+pred_aqveg_results
+
+#### occu. 0.5037768 (0.3918289-0.6153473) [0] - 0.8838211 (0.6662652-0.9666541) [2.9]
+
+
+###wetland edge prediction
+wetedge_seq<-seq(from=0,to=11.5,length.out=100)
+
+wetedge_seq_df<-data.frame(wetland_edge_km=wetedge_seq,
+                           aquatic_veg=0.5272,
+                           fringing_veg=0.4145,
+                           fish='fish') 
+
+pred_det_wetedge<-predict(m81_22,
+                          type='state',
+                          newdata=wetedge_seq_df)
+
+pred_wetedge_results<-cbind(wetedge_seq_df,pred_det_wetedge)
+pred_wetedge_results
+
+#### det. 0.5215665 (0.4126706-0.6284505) [0] - 0.8954662 (0.7352226-0.9635395) [11.5]
+
+
+###fish prediction
+fish_to_pred<-c('fish','no_fish')
+
+fish_df<-data.frame(fish=fish_to_pred,
+                    aquatic_veg=0.5272,
+                    wetland_edge_km=1.6452,
+                    fringing_veg=0.4145)
+
+pred_det_fish<-predict(m81_22,
+                       type='state',
+                       newdata=fish_df)
+
+pred_fish_results<-cbind(fish_to_pred,pred_det_fish)
+pred_fish_results
+
+#### det. 0.4702090 (0.4170060-0.5240976) [no fish] - 0.5941725 (0.5017847_0.6803421) [fish]
+
+
+###fringing_veg prediction
+frveg_seq<-seq(from=0,to=1,length.out=100)
+
+frveg_seq_df<-data.frame(fringing_veg=frveg_seq,
+                        aquatic_veg=0.5272,
+                        fish='fish',
+                        wetland_edge_km=1.6452) 
+
+pred_det_frveg<-predict(m45_22,
+                       type='state',
+                       newdata=frveg_seq_df)
+
+pred_frveg_results<-cbind(frveg_seq_df,pred_det_frveg)
+
+pred_frveg_results
+
+#### occu. 0.4313327 (0.3526063 0.5136894) [0] - 0.6047884 (0.4960011 0.7041024) [1]
+
+
+
+#PLOTS ####
+
+##Detection Plots
+
+###humidity plot
+plot(x=pred_hum_results$humidity, 
+     y=pred_hum_results$Predicted,
+     type='l',
+     xlab='Humidity (%)',
+     ylab='Detection probability (%)',
+     main=expression("Effect of humdity on detection probability of" ~ italic("LLimnodynastes tasmaniensis") ~""),
+     ylim=c(0,1),
+     xlim=c(0,1),
+     lwd=1.7)+
+  lines(x=pred_hum_results$humidity,
+        y=pred_hum_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_hum_results$humidity,
+        y=pred_hum_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+
+###had_rained plot
+spmf_rain_bp<-barplot(pred_rain_results$Predicted,
+                     space=0.2,
+                     names=c('Had rained', 'Had not rained'),
+                     ylim=c(0,0.9),
+                     ylab='Detection probability (%)',
+                     main=expression("Effect of previous rain on detection probability of" ~ italic("Limnodynastes tasmaniensis") ~""),
+                     mgp=c(2.75,0.8,0),
+                     lwd=2)
+arrows(spmf_rain_bp,pred_rain_results$lower,
+       spmf_rain_bp,pred_rain_results$upper,
+       code=3,
+       angle=90,
+       length=0.1,
+       lwd=2)+
+  abline(0,0,
+         lwd=2)
+
+
+###night plot
+spmf_night_bp<-barplot(pred_night_results$Predicted,
+                      space=0.2,
+                      names=c('Night','Day'),
+                      ylim=c(0,0.8),
+                      ylab='Detection probability (%)',
+                      main=expression("Effect of time of day on detection probability of" ~ italic("Limnodynastes tasmaniensis") ~""),
+                      mgp=c(2.75,0.8,0),
+                      lwd=2)
+arrows(spmf_night_bp,pred_night_results$lower,
+       spmf_night_bp,pred_night_results$upper,
+       code=3,
+       angle=90,
+       length=0.1,
+       lwd=2)+
+  abline(0,0,
+         lwd=2)
+
+
+##Occupancy Plots
+
+
+###aquatic_veg plot
+plot(x=pred_aqveg_results$aquatic_veg, 
+     y=pred_aqveg_results$Predicted,
+     type='l',
+     xlab='Acquatic vegetation cover (%)',
+     ylab='Occupancy probability (%)',
+     main=expression("Effect of aquatic vegetation on occupancy probability of" ~ italic("Limnodynastes tasmaniensis") ~""),
+     ylim=c(0,1),
+     xlim=c(0,3),
+     lwd=1.7)+
+  lines(x=pred_aqveg_results$aquatic_veg,
+        y=pred_aqveg_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_aqveg_results$aquatic_veg,
+        y=pred_aqveg_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+
+###wetland_edge_km plot
+plot(x=pred_wetedge_results$wetland_edge_km, 
+     y=pred_wetedge_results$Predicted,
+     type='l',
+     xlab='Wetland edge (km)',
+     ylab='Occupancy probability (%)',
+     main=expression("Effect of wetland edge amount on occupancy probability of" ~ italic("Limnodynastes tasmaniensis") ~""),
+     ylim=c(0,1),
+     xlim=c(0,13),
+     lwd=1.7)+
+  lines(x=pred_wetedge_results$wetland_edge_km,
+        y=pred_wetedge_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_wetedge_results$wetland_edge_km,
+        y=pred_wetedge_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+
+###fish plot
+spmf_fish_bp<-barplot(pred_fish_results$Predicted,
+                     space=0.2,
+                     names=c('Fish','No fish'),
+                     ylim=c(0,0.8),
+                     ylab='Detection probability (%)',
+                     main=expression("Effect of fish presence on detection probability of" ~ italic("Limnodynastes tasmaniensis") ~""),
+                     mgp=c(2.75,0.8,0),
+                     lwd=2)
+arrows(spmf_fish_bp,pred_fish_results$lower,
+       spmf_fish_bp,pred_fish_results$upper,
+       code=3,
+       angle=90,
+       length=0.1,
+       lwd=2)+
+  abline(0,0,
+         lwd=2)
+
+
+###fringing_veg plot
+plot(x=pred_frveg_results$fringing_veg, 
+     y=pred_frveg_results$Predicted,
+     type='l',
+     xlab='Fringing vegetation (%)',
+     ylab='Occupancy probability (%)',
+     main=expression("Effect of fringing vegetation amount on occupancy probability of" ~ italic("Limnodynastes tasmaniensis") ~""),
+     ylim=c(0,1),
+     xlim=c(0,1),
+     lwd=1.7)+
+  lines(x=pred_frveg_results$fringing_veg,
+        y=pred_frveg_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_frveg_results$fringing_veg,
+        y=pred_frveg_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+
+
