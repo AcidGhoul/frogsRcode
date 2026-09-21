@@ -1,0 +1,1286 @@
+library(unmarked)
+wtf_data <- readRDS("wtf_unmarked.RData")
+summary(wtf_data)
+
+library(lares)
+
+corr(obsCovs(wtf_data))
+corr(siteCovs(wtf_data))
+
+
+
+#MODELS####
+
+
+##**                                                Detection Models*
+
+m0<-occu(formula=~1~1,data=wtf_data)
+
+###1 Covariate
+md1 <- occu(~ had_rained ~ 1, data = wtf_data)
+md2 <- occu(~ humidity ~ 1, data = wtf_data)
+md3 <- occu(~ night ~ 1, data = wtf_data)
+md4 <- occu(~ temperature ~ 1, data = wtf_data)
+md5 <- occu(~ was_raining ~ 1, data = wtf_data)
+md6 <- occu(~ wind_speed ~ 1, data = wtf_data)
+
+###2 Covariate 
+md7  <- occu(~ had_rained + humidity ~ 1, data = wtf_data)
+md8  <- occu(~ had_rained + night ~ 1, data = wtf_data)
+md9  <- occu(~ had_rained + temperature ~ 1, data = wtf_data)
+md10 <- occu(~ had_rained + was_raining ~ 1, data = wtf_data)
+md11 <- occu(~ had_rained + wind_speed ~ 1, data = wtf_data)
+md12 <- occu(~ humidity + night ~ 1, data = wtf_data)
+md13 <- occu(~ humidity + temperature ~ 1, data = wtf_data)
+md14 <- occu(~ humidity + was_raining ~ 1, data = wtf_data)
+md15 <- occu(~ humidity + wind_speed ~ 1, data = wtf_data)
+md16 <- occu(~ night + temperature ~ 1, data = wtf_data)
+md17 <- occu(~ night + was_raining ~ 1, data = wtf_data)
+md18 <- occu(~ night + wind_speed ~ 1, data = wtf_data)
+md19 <- occu(~ temperature + was_raining ~ 1, data = wtf_data)
+md20 <- occu(~ temperature + wind_speed ~ 1, data = wtf_data)
+md21 <- occu(~ was_raining + wind_speed ~ 1, data = wtf_data)
+
+###3 Covariate
+md22 <- occu(~ had_rained + humidity + night ~ 1, data = wtf_data)
+md23 <- occu(~ had_rained + humidity + temperature ~ 1, data = wtf_data)
+md24 <- occu(~ had_rained + humidity + was_raining ~ 1, data = wtf_data)
+md25 <- occu(~ had_rained + humidity + wind_speed ~ 1, data = wtf_data)
+md26 <- occu(~ had_rained + night + temperature ~ 1, data = wtf_data)
+md27 <- occu(~ had_rained + night + was_raining ~ 1, data = wtf_data)
+md28 <- occu(~ had_rained + night + wind_speed ~ 1, data = wtf_data)
+md29 <- occu(~ had_rained + temperature + was_raining ~ 1, data = wtf_data)
+md30 <- occu(~ had_rained + temperature + wind_speed ~ 1, data = wtf_data)
+md31 <- occu(~ had_rained + was_raining + wind_speed ~ 1, data = wtf_data)
+md32 <- occu(~ humidity + night + temperature ~ 1, data = wtf_data)
+md33 <- occu(~ humidity + night + was_raining ~ 1, data = wtf_data)
+md34 <- occu(~ humidity + night + wind_speed ~ 1, data = wtf_data)
+md35 <- occu(~ humidity + temperature + was_raining ~ 1, data = wtf_data)
+md36 <- occu(~ humidity + temperature + wind_speed ~ 1, data = wtf_data)
+md37 <- occu(~ humidity + was_raining + wind_speed ~ 1, data = wtf_data)
+md38 <- occu(~ night + temperature + was_raining ~ 1, data = wtf_data)
+md39 <- occu(~ night + temperature + wind_speed ~ 1, data = wtf_data)
+md40 <- occu(~ night + was_raining + wind_speed ~ 1, data = wtf_data)
+md41 <- occu(~ temperature + was_raining + wind_speed ~ 1, data = wtf_data)
+
+
+##Model ranking
+
+wtf_models_ob<-fitList('md1'=md1,
+                       'md2'=md2,
+                       'md3'=md3,
+                       'md4'=md4,
+                       'md5'=md5,
+                       'md6'=md6,
+                       'md7'=md7,
+                       'md8'=md8,
+                       'md9'=md9,
+                       'md10'=md10,
+                       'md11'=md11,
+                       'md12'=md12,
+                       'md13'=md13,
+                       'md14'=md14,
+                       'md15'=md15,
+                       'md16'=md16,
+                       'md17'=md17,
+                       'md18'=md18,
+                       'md19'=md19,
+                       'md20'=md20,
+                       'md21'=md21,
+                       'md22'=md22,
+                       'md23'=md23,
+                       'md24'=md24,
+                       'md25'=md25,
+                       'md26'=md26,
+                       'md27'=md27,
+                       'md28'=md28,
+                       'md29'=md29,
+                       'md30'=md30,
+                       'md31'=md31,
+                       'md32'=md32,
+                       'md33'=md33,
+                       'md34'=md34,
+                       'md35'=md35,
+                       'md36'=md36,
+                       'md37'=md37,
+                       'md38'=md38,
+                       'md39'=md39,
+                       'md40'=md40,
+                       'md41'=md41)
+
+wtf_aictab_ob<-modSel(wtf_models_ob)
+wtf_aictab_ob
+
+wtf_aictable_ob<-as(wtf_aictab_ob, "data.frame")[,c("model", "formula", "nPars", "n", "AIC", "delta", "AICwt", "cumltvWt")]
+wtf_aictable_ob<-data.frame(wtf_aictable_ob[,1:3], round(wtf_aictable_ob[,4:7],2 ))
+write.csv(wtf_aictable_ob, "wtf_aictable_ob.csv" , row.names = FALSE)
+read.csv(wtf_aictable_ob.csv)
+
+
+##**                                                Occupancy models*
+
+###1 Covariate
+
+m1 <- occu(~ 1 ~ fringing_veg, data = wtf_data)
+m2 <- occu(~ 1 ~ mature_trees_within30m, data = wtf_data)
+m3 <- occu(~ 1 ~ aquatic_veg, data = wtf_data)
+m4 <- occu(~ 1 ~ wt_roadkms_per_km2, data = wtf_data)
+m5 <- occu(~ 1 ~ pct_wetland_cover, data = wtf_data)
+m6 <- occu(~ 1 ~ wetland_edge_km, data = wtf_data)
+m7 <- occu(~ 1 ~ stream, data = wtf_data)
+m8 <- occu(~ 1 ~ fish, data = wtf_data)
+
+###2 Covariate
+m9 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m, data = wtf_data)
+m10 <- occu(~ 1 ~ fringing_veg + aquatic_veg, data = wtf_data)
+m11 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2, data = wtf_data)
+m12 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover, data = wtf_data)
+m13 <- occu(~ 1 ~ fringing_veg + wetland_edge_km, data = wtf_data)
+m14 <- occu(~ 1 ~ fringing_veg + stream, data = wtf_data)
+m15 <- occu(~ 1 ~ fringing_veg + fish, data = wtf_data)
+m16 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg, data = wtf_data)
+m17 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2, data = wtf_data)
+m18 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover, data = wtf_data)
+m19 <- occu(~ 1 ~ mature_trees_within30m + wetland_edge_km, data = wtf_data)
+m20 <- occu(~ 1 ~ mature_trees_within30m + stream, data = wtf_data)
+m21 <- occu(~ 1 ~ mature_trees_within30m + fish, data = wtf_data)
+m22 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2, data = wtf_data)
+m23 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover, data = wtf_data)
+m24 <- occu(~ 1 ~ aquatic_veg + wetland_edge_km, data = wtf_data)
+m25 <- occu(~ 1 ~ aquatic_veg + stream, data = wtf_data)
+m26 <- occu(~ 1 ~ aquatic_veg + fish, data = wtf_data)
+m27 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover, data = wtf_data)
+m28 <- occu(~ 1 ~ wt_roadkms_per_km2 + wetland_edge_km, data = wtf_data)
+m29 <- occu(~ 1 ~ wt_roadkms_per_km2 + stream, data = wtf_data)
+m30 <- occu(~ 1 ~ wt_roadkms_per_km2 + fish, data = wtf_data)
+m31 <- occu(~ 1 ~ pct_wetland_cover + wetland_edge_km, data = wtf_data)
+m32 <- occu(~ 1 ~ pct_wetland_cover + stream, data = wtf_data)
+m33 <- occu(~ 1 ~ pct_wetland_cover + fish, data = wtf_data)
+m34 <- occu(~ 1 ~ wetland_edge_km + stream, data = wtf_data)
+m35 <- occu(~ 1 ~ wetland_edge_km + fish, data = wtf_data)
+m36 <- occu(~ 1 ~ stream + fish, data = wtf_data)
+
+###3 Covariate
+m37 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + aquatic_veg, data = wtf_data)
+m38 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + wt_roadkms_per_km2, data = wtf_data)
+m39 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + pct_wetland_cover, data = wtf_data)
+m40 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + wetland_edge_km, data = wtf_data)
+m41 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + stream, data = wtf_data)
+m42 <- occu(~ 1 ~ fringing_veg + mature_trees_within30m + fish, data = wtf_data)
+m43 <- occu(~ 1 ~ fringing_veg + aquatic_veg + wt_roadkms_per_km2, data = wtf_data)
+m44 <- occu(~ 1 ~ fringing_veg + aquatic_veg + pct_wetland_cover, data = wtf_data)
+m45 <- occu(~ 1 ~ fringing_veg + aquatic_veg + wetland_edge_km, data = wtf_data)
+m46 <- occu(~ 1 ~ fringing_veg + aquatic_veg + stream, data = wtf_data)
+m47 <- occu(~ 1 ~ fringing_veg + aquatic_veg + fish, data = wtf_data)
+m48 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + pct_wetland_cover, data = wtf_data)
+m49 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + wetland_edge_km, data = wtf_data)
+m50 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + stream, data = wtf_data)
+m51 <- occu(~ 1 ~ fringing_veg + wt_roadkms_per_km2 + fish, data = wtf_data)
+m52 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover + wetland_edge_km, data = wtf_data)
+m53 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover + stream, data = wtf_data)
+m54 <- occu(~ 1 ~ fringing_veg + pct_wetland_cover + fish, data = wtf_data)
+m55 <- occu(~ 1 ~ fringing_veg + wetland_edge_km + stream, data = wtf_data)
+m56 <- occu(~ 1 ~ fringing_veg + wetland_edge_km + fish, data = wtf_data)
+m57 <- occu(~ 1 ~ fringing_veg + stream + fish, data = wtf_data)
+m58 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + wt_roadkms_per_km2, data = wtf_data)
+m59 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + pct_wetland_cover, data = wtf_data)
+m60 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + wetland_edge_km, data = wtf_data)
+m61 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + stream, data = wtf_data)
+m62 <- occu(~ 1 ~ mature_trees_within30m + aquatic_veg + fish, data = wtf_data)
+m63 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + pct_wetland_cover, data = wtf_data)
+m64 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + wetland_edge_km, data = wtf_data)
+m65 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + stream, data = wtf_data)
+m66 <- occu(~ 1 ~ mature_trees_within30m + wt_roadkms_per_km2 + fish, data = wtf_data)
+m67 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover + wetland_edge_km, data = wtf_data)
+m68 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover + stream, data = wtf_data)
+m69 <- occu(~ 1 ~ mature_trees_within30m + pct_wetland_cover + fish, data = wtf_data)
+m70 <- occu(~ 1 ~ mature_trees_within30m + wetland_edge_km + stream, data = wtf_data)
+m71 <- occu(~ 1 ~ mature_trees_within30m + wetland_edge_km + fish, data = wtf_data)
+m72 <- occu(~ 1 ~ mature_trees_within30m + stream + fish, data = wtf_data)
+m73 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + pct_wetland_cover, data = wtf_data)
+m74 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + wetland_edge_km, data = wtf_data)
+m75 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + stream, data = wtf_data)
+m76 <- occu(~ 1 ~ aquatic_veg + wt_roadkms_per_km2 + fish, data = wtf_data)
+m77 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover + wetland_edge_km, data = wtf_data)
+m78 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover + stream, data = wtf_data)
+m79 <- occu(~ 1 ~ aquatic_veg + pct_wetland_cover + fish, data = wtf_data)
+m80 <- occu(~ 1 ~ aquatic_veg + wetland_edge_km + stream, data = wtf_data)
+m81 <- occu(~ 1 ~ aquatic_veg + wetland_edge_km + fish, data = wtf_data)
+m82 <- occu(~ 1 ~ aquatic_veg + stream + fish, data = wtf_data)
+m83 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover + wetland_edge_km, data = wtf_data)
+m84 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover + stream, data = wtf_data)
+m85 <- occu(~ 1 ~ wt_roadkms_per_km2 + pct_wetland_cover + fish, data = wtf_data)
+m86 <- occu(~ 1 ~ wt_roadkms_per_km2 + wetland_edge_km + stream, data = wtf_data)
+m87 <- occu(~ 1 ~ wt_roadkms_per_km2 + wetland_edge_km + fish, data = wtf_data)
+m88 <- occu(~ 1 ~ wt_roadkms_per_km2 + stream + fish, data = wtf_data)
+m89 <- occu(~ 1 ~ pct_wetland_cover + wetland_edge_km + stream, data = wtf_data)
+m90 <- occu(~ 1 ~ pct_wetland_cover + wetland_edge_km + fish, data = wtf_data)
+m91 <- occu(~ 1 ~ pct_wetland_cover + stream + fish, data = wtf_data)
+m92 <- occu(~ 1 ~ wetland_edge_km + stream + fish, data = wtf_data)
+
+##Model ranking
+
+wtf_models_site <- fitList('m1' = m1,
+                           'm2' = m2,
+                           'm3' = m3,
+                           'm4' = m4,
+                           'm5' = m5,
+                           'm6' = m6,
+                           'm7' = m7,
+                           'm8' = m8,
+                           'm9' = m9,
+                           'm10' = m10,
+                           'm11' = m11,
+                           'm12' = m12,
+                           'm13' = m13,
+                           'm14' = m14,
+                           'm15' = m15,
+                           'm16' = m16,
+                           'm17' = m17,
+                           'm18' = m18,
+                           'm19' = m19,
+                           'm20' = m20,
+                           'm21' = m21,
+                           'm22' = m22,
+                           'm23' = m23,
+                           'm24' = m24,
+                           'm25' = m25,
+                           'm26' = m26,
+                           'm27' = m27,
+                           'm28' = m28,
+                           'm29' = m29,
+                           'm30' = m30,
+                           'm31' = m31,
+                           'm32' = m32,
+                           'm33' = m33,
+                           'm34' = m34,
+                           'm35' = m35,
+                           'm36' = m36,
+                           'm37' = m37,
+                           'm38' = m38,
+                           'm39' = m39,
+                           'm40' = m40,
+                           'm41' = m41,
+                           'm42' = m42,
+                           'm43' = m43,
+                           'm44' = m44,
+                           'm45' = m45,
+                           'm46' = m46,
+                           'm47' = m47,
+                           'm48' = m48,
+                           'm49' = m49,
+                           'm50' = m50,
+                           'm51' = m51,
+                           'm52' = m52,
+                           'm53' = m53,
+                           'm54' = m54,
+                           'm55' = m55,
+                           'm56' = m56,
+                           'm57' = m57,
+                           'm58' = m58,
+                           'm59' = m59,
+                           'm60' = m60,
+                           'm61' = m61,
+                           'm62' = m62,
+                           'm63' = m63,
+                           'm64' = m64,
+                           'm65' = m65,
+                           'm66' = m66,
+                           'm67' = m67,
+                           'm68' = m68,
+                           'm69' = m69,
+                           'm70' = m70,
+                           'm71' = m71,
+                           'm72' = m72,
+                           'm73' = m73,
+                           'm74' = m74,
+                           'm75' = m75,
+                           'm76' = m76,
+                           'm77' = m77,
+                           'm78' = m78,
+                           'm79' = m79,
+                           'm80' = m80,
+                           'm81' = m81,
+                           'm82' = m82,
+                           'm83' = m83,
+                           'm84' = m84,
+                           'm85' = m85,
+                           'm86' = m86,
+                           'm87' = m87,
+                           'm88' = m88,
+                           'm89' = m89,
+                           'm90' = m90,
+                           'm91' = m91,
+                           'm92' = m92)
+
+
+wtf_aictab_site<-modSel(wtf_models_site)
+wtf_aictab_site
+
+wtf_aictable_site<-as(wtf_aictab_site, "data.frame")[,c("model", "formula", "nPars", "n", "AIC", "delta", "AICwt", "cumltvWt")]
+wtf_aictable_site<-data.frame(wtf_aictable_site[,1:3], round(wtf_aictable_site[,4:7],2 ))
+write.csv(wtf_aictable_site, "wtf_aictable_site.csv" , row.names = FALSE)
+
+momax <- occu(formula = ~ had_rained + night + humidity + temperature + was_raining + wind_speed+ night  
+              ~ fringing_veg+ mature_trees_within30m + aquatic_veg + wt_roadkms_per_km2 + pct_wetland_cover + stream + fish, data = wtf_data)
+
+
+##**                                                Combined Models (delta <6)*
+
+###Site+md22
+m75_22<-occu(~had_rained+humidity+night~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_22<-occu(~had_rained+humidity+night~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_22<-occu(~had_rained+humidity+night~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_22<-occu(~had_rained+humidity+night~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_22<-occu(~had_rained+humidity+night~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_22<-occu(~had_rained+humidity+night~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_22<-occu(~had_rained+humidity+night~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_22<-occu(~had_rained+humidity+night~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_22<-occu(~had_rained+humidity+night~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2,data=wtf_data)
+m28_22<-occu(~had_rained+humidity+night~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md28
+m75_28<-occu(~had_rained+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_28<-occu(~had_rained+night+wind_speed~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_28<-occu(~had_rained+night+wind_speed~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_28<-occu(~had_rained+night+wind_speed~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_28<-occu(~had_rained+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_28<-occu(~had_rained+night+wind_speed~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_28<-occu(~had_rained+night+wind_speed~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_28<-occu(~had_rained+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_28<-occu(~had_rained+night+wind_speed~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_28<-occu(~had_rained+night+wind_speed~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_28<-occu(~had_rained+night+wind_speed~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_28<-occu(~had_rained+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_28<-occu(~had_rained+night+wind_speed~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_28<-occu(~had_rained+night+wind_speed~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_28<-occu(~had_rained+night+wind_speed~wt_roadkms_per_km2,data=wtf_data)
+m28_28<-occu(~had_rained+night+wind_speed~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md12
+m75_12<-occu(~humidity+night~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_12<-occu(~humidity+night~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_12<-occu(~humidity+night~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_12<-occu(~humidity+night~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_12<-occu(~humidity+night~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_12<-occu(~humidity+night~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_12<-occu(~humidity+night~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_12<-occu(~humidity+night~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_12<-occu(~humidity+night~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_12<-occu(~humidity+night~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_12<-occu(~humidity+night~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_12<-occu(~humidity+night~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_12<-occu(~humidity+night~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_12<-occu(~humidity+night~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_12<-occu(~humidity+night~wt_roadkms_per_km2,data=wtf_data)
+m28_12<-occu(~humidity+night~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md34
+m75_34<-occu(~humidity+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_34<-occu(~humidity+night+wind_speed~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_34<-occu(~humidity+night+wind_speed~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_34<-occu(~humidity+night+wind_speed~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_34<-occu(~humidity+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_34<-occu(~humidity+night+wind_speed~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_34<-occu(~humidity+night+wind_speed~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_34<-occu(~humidity+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_34<-occu(~humidity+night+wind_speed~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_34<-occu(~humidity+night+wind_speed~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_34<-occu(~humidity+night+wind_speed~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_34<-occu(~humidity+night+wind_speed~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_34<-occu(~humidity+night+wind_speed~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_34<-occu(~humidity+night+wind_speed~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_34<-occu(~humidity+night+wind_speed~wt_roadkms_per_km2,data=wtf_data)
+m28_34<-occu(~humidity+night+wind_speed~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md32
+m75_32<-occu(~humidity+night+temperature~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_32<-occu(~humidity+night+temperature~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_32<-occu(~humidity+night+temperature~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_32<-occu(~humidity+night+temperature~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_32<-occu(~humidity+night+temperature~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_32<-occu(~humidity+night+temperature~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_32<-occu(~humidity+night+temperature~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_32<-occu(~humidity+night+temperature~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_32<-occu(~humidity+night+temperature~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_32<-occu(~humidity+night+temperature~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_32<-occu(~humidity+night+temperature~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_32<-occu(~humidity+night+temperature~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_32<-occu(~humidity+night+temperature~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_32<-occu(~humidity+night+temperature~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_32<-occu(~humidity+night+temperature~wt_roadkms_per_km2,data=wtf_data)
+m28_32<-occu(~humidity+night+temperature~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md40
+m75_40<-occu(~night+was_raining+wind_speed~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_40<-occu(~night+was_raining+wind_speed~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_40<-occu(~night+was_raining+wind_speed~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_40<-occu(~night+was_raining+wind_speed~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_40<-occu(~night+was_raining+wind_speed~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_40<-occu(~night+was_raining+wind_speed~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_40<-occu(~night+was_raining+wind_speed~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_40<-occu(~night+was_raining+wind_speed~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_40<-occu(~night+was_raining+wind_speed~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_40<-occu(~night+was_raining+wind_speed~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_40<-occu(~night+was_raining+wind_speed~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_40<-occu(~night+was_raining+wind_speed~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_40<-occu(~night+was_raining+wind_speed~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_40<-occu(~night+was_raining+wind_speed~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_40<-occu(~night+was_raining+wind_speed~wt_roadkms_per_km2,data=wtf_data)
+m28_40<-occu(~night+was_raining+wind_speed~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md18
+m75_18<-occu(~night+wind_speed~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_18<-occu(~night+wind_speed~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_18<-occu(~night+wind_speed~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_18<-occu(~night+wind_speed~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_18<-occu(~night+wind_speed~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_18<-occu(~night+wind_speed~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_18<-occu(~night+wind_speed~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_18<-occu(~night+wind_speed~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_18<-occu(~night+wind_speed~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_18<-occu(~night+wind_speed~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_18<-occu(~night+wind_speed~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_18<-occu(~night+wind_speed~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_18<-occu(~night+wind_speed~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_18<-occu(~night+wind_speed~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_18<-occu(~night+wind_speed~wt_roadkms_per_km2,data=wtf_data)
+m28_18<-occu(~night+wind_speed~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md33
+m75_33<-occu(~humidity+night+was_raining~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_33<-occu(~humidity+night+was_raining~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_33<-occu(~humidity+night+was_raining~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_33<-occu(~humidity+night+was_raining~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_33<-occu(~humidity+night+was_raining~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_33<-occu(~humidity+night+was_raining~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_33<-occu(~humidity+night+was_raining~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_33<-occu(~humidity+night+was_raining~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_33<-occu(~humidity+night+was_raining~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2,data=wtf_data)
+m28_33<-occu(~humidity+night+was_raining~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md8
+m75_8<-occu(~had_rained+night~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_8<-occu(~had_rained+night~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_8<-occu(~had_rained+night~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_8<-occu(~had_rained+night~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_8<-occu(~had_rained+night~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_8<-occu(~had_rained+night~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_8<-occu(~had_rained+night~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_8<-occu(~had_rained+night~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_8<-occu(~had_rained+night~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_8<-occu(~had_rained+night~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_8<-occu(~had_rained+night~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_8<-occu(~had_rained+night~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_8<-occu(~had_rained+night~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_8<-occu(~had_rained+night~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_8<-occu(~had_rained+night~wt_roadkms_per_km2,data=wtf_data)
+m28_8<-occu(~had_rained+night~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md3
+m75_3<-occu(~night~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_3<-occu(~night~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_3<-occu(~night~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_3<-occu(~night~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_3<-occu(~night~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_3<-occu(~night~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_3<-occu(~night~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_3<-occu(~night~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_3<-occu(~night~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_3<-occu(~night~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_3<-occu(~night~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_3<-occu(~night~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_3<-occu(~night~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_3<-occu(~night~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_3<-occu(~night~wt_roadkms_per_km2,data=wtf_data)
+m28_3<-occu(~night~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md39
+m75_39<-occu(~night+temperature+wind_speed~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_39<-occu(~night+temperature+wind_speed~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_39<-occu(~night+temperature+wind_speed~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_39<-occu(~night+temperature+wind_speed~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_39<-occu(~night+temperature+wind_speed~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_39<-occu(~night+temperature+wind_speed~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_39<-occu(~night+temperature+wind_speed~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_39<-occu(~night+temperature+wind_speed~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_39<-occu(~night+temperature+wind_speed~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_39<-occu(~night+temperature+wind_speed~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_39<-occu(~night+temperature+wind_speed~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_39<-occu(~night+temperature+wind_speed~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_39<-occu(~night+temperature+wind_speed~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_39<-occu(~night+temperature+wind_speed~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_39<-occu(~night+temperature+wind_speed~wt_roadkms_per_km2,data=wtf_data)
+m28_39<-occu(~night+temperature+wind_speed~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md17
+m75_17<-occu(~night+was_raining~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_17<-occu(~night+was_raining~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_17<-occu(~night+was_raining~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_17<-occu(~night+was_raining~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_17<-occu(~night+was_raining~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_17<-occu(~night+was_raining~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_17<-occu(~night+was_raining~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_17<-occu(~night+was_raining~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_17<-occu(~night+was_raining~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_17<-occu(~night+was_raining~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_17<-occu(~night+was_raining~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_17<-occu(~night+was_raining~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_17<-occu(~night+was_raining~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_17<-occu(~night+was_raining~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_17<-occu(~night+was_raining~wt_roadkms_per_km2,data=wtf_data)
+m28_17<-occu(~night+was_raining~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md27
+m75_27<-occu(~had_rained+night+was_raining~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_27<-occu(~had_rained+night+was_raining~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_27<-occu(~had_rained+night+was_raining~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_27<-occu(~had_rained+night+was_raining~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_27<-occu(~had_rained+night+was_raining~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_27<-occu(~had_rained+night+was_raining~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_27<-occu(~had_rained+night+was_raining~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_27<-occu(~had_rained+night+was_raining~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_27<-occu(~had_rained+night+was_raining~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_27<-occu(~had_rained+night+was_raining~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_27<-occu(~had_rained+night+was_raining~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_27<-occu(~had_rained+night+was_raining~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_27<-occu(~had_rained+night+was_raining~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_27<-occu(~had_rained+night+was_raining~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_27<-occu(~had_rained+night+was_raining~wt_roadkms_per_km2,data=wtf_data)
+m28_27<-occu(~had_rained+night+was_raining~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md26
+m75_26<-occu(~had_rained+night+temperature~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_26<-occu(~had_rained+night+temperature~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_26<-occu(~had_rained+night+temperature~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_26<-occu(~had_rained+night+temperature~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_26<-occu(~had_rained+night+temperature~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_26<-occu(~had_rained+night+temperature~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_26<-occu(~had_rained+night+temperature~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_26<-occu(~had_rained+night+temperature~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_26<-occu(~had_rained+night+temperature~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_26<-occu(~had_rained+night+temperature~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_26<-occu(~had_rained+night+temperature~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_26<-occu(~had_rained+night+temperature~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_26<-occu(~had_rained+night+temperature~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_26<-occu(~had_rained+night+temperature~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_26<-occu(~had_rained+night+temperature~wt_roadkms_per_km2,data=wtf_data)
+m28_26<-occu(~had_rained+night+temperature~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+###Site+md16
+m75_16<-occu(~night+temperature~aquatic_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m84_16<-occu(~night+temperature~wt_roadkms_per_km2+pct_wetland_cover+stream,data=wtf_data)
+m29_16<-occu(~night+temperature~wt_roadkms_per_km2+stream,data=wtf_data)
+m86_16<-occu(~night+temperature~wt_roadkms_per_km2+wetland_edge_km+stream,data=wtf_data)
+m73_16<-occu(~night+temperature~aquatic_veg+wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m65_16<-occu(~night+temperature~mature_trees_within30m+wt_roadkms_per_km2+stream,data=wtf_data)
+m22_16<-occu(~night+temperature~aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m74_16<-occu(~night+temperature~aquatic_veg+wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+m88_16<-occu(~night+temperature~wt_roadkms_per_km2+stream+fish,data=wtf_data)
+m50_16<-occu(~night+temperature~fringing_veg+wt_roadkms_per_km2+stream,data=wtf_data)
+m58_16<-occu(~night+temperature~mature_trees_within30m+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m76_16<-occu(~night+temperature~aquatic_veg+wt_roadkms_per_km2+fish,data=wtf_data)
+m43_16<-occu(~night+temperature~fringing_veg+aquatic_veg+wt_roadkms_per_km2,data=wtf_data)
+m27_16<-occu(~night+temperature~wt_roadkms_per_km2+pct_wetland_cover,data=wtf_data)
+m4_16<-occu(~night+temperature~wt_roadkms_per_km2,data=wtf_data)
+m28_16<-occu(~night+temperature~wt_roadkms_per_km2+wetland_edge_km,data=wtf_data)
+
+
+
+##Model ranking
+
+wtf_models_best<- fitList('m75_22'=m75_22,
+                          'm84_22'=m84_22,
+                          'm29_22'=m29_22,
+                          'm86_22'=m86_22,
+                          'm73_22'=m73_22,
+                          'm65_22'=m65_22,
+                          'm22_22'=m22_22,
+                          'm74_22'=m74_22,
+                          'm88_22'=m88_22,
+                          'm50_22'=m50_22,
+                          'm58_22'=m58_22,
+                          'm76_22'=m76_22,
+                          'm43_22'=m43_22,
+                          'm27_22'=m27_22,
+                          'm4_22'=m4_22,
+                          'm28_22'=m28_22,
+                          'm75_28'=m75_28,
+                          'm84_28'=m84_28,
+                          'm29_28'=m29_28,
+                          'm86_28'=m86_28,
+                          'm73_28'=m73_28,
+                          'm65_28'=m65_28,
+                          'm22_28'=m22_28,
+                          'm74_28'=m74_28,
+                          'm88_28'=m88_28,
+                          'm50_28'=m50_28,
+                          'm58_28'=m58_28,
+                          'm76_28'=m76_28,
+                          'm43_28'=m43_28,
+                          'm27_28'=m27_28,
+                          'm4_28'=m4_28,
+                          'm28_28'=m28_28,
+                          'm75_12'=m75_12,
+                          'm84_12'=m84_12,
+                          'm29_12'=m29_12,
+                          'm86_12'=m86_12,
+                          'm73_12'=m73_12,
+                          'm65_12'=m65_12,
+                          'm22_12'=m22_12,
+                          'm74_12'=m74_12,
+                          'm88_12'=m88_12,
+                          'm50_12'=m50_12,
+                          'm58_12'=m58_12,
+                          'm76_12'=m76_12,
+                          'm43_12'=m43_12,
+                          'm27_12'=m27_12,
+                          'm4_12'=m4_12,
+                          'm28_12'=m28_12,
+                          'm75_34'=m75_34,
+                          'm84_34'=m84_34,
+                          'm29_34'=m29_34,
+                          'm86_34'=m86_34,
+                          'm73_34'=m73_34,
+                          'm65_34'=m65_34,
+                          'm22_34'=m22_34,
+                          'm74_34'=m74_34,
+                          'm88_34'=m88_34,
+                          'm50_34'=m50_34,
+                          'm58_34'=m58_34,
+                          'm76_34'=m76_34,
+                          'm43_34'=m43_34,
+                          'm27_34'=m27_34,
+                          'm4_34'=m4_34,
+                          'm28_34'=m28_34,
+                          'm75_32'=m75_32,
+                          'm84_32'=m84_32,
+                          'm29_32'=m29_32,
+                          'm86_32'=m86_32,
+                          'm73_32'=m73_32,
+                          'm65_32'=m65_32,
+                          'm22_32'=m22_32,
+                          'm74_32'=m74_32,
+                          'm88_32'=m88_32,
+                          'm50_32'=m50_32,
+                          'm58_32'=m58_32,
+                          'm76_32'=m76_32,
+                          'm43_32'=m43_32,
+                          'm27_32'=m27_32,
+                          'm4_32'=m4_32,
+                          'm28_32'=m28_32,
+                          'm75_40'=m75_40,
+                          'm84_40'=m84_40,
+                          'm29_40'=m29_40,
+                          'm86_40'=m86_40,
+                          'm73_40'=m73_40,
+                          'm65_40'=m65_40,
+                          'm22_40'=m22_40,
+                          'm74_40'=m74_40,
+                          'm88_40'=m88_40,
+                          'm50_40'=m50_40,
+                          'm58_40'=m58_40,
+                          'm76_40'=m76_40,
+                          'm43_40'=m43_40,
+                          'm27_40'=m27_40,
+                          'm4_40'=m4_40,
+                          'm28_40'=m28_40,
+                          'm75_18'=m75_18,
+                          'm84_18'=m84_18,
+                          'm29_18'=m29_18,
+                          'm86_18'=m86_18,
+                          'm73_18'=m73_18,
+                          'm65_18'=m65_18,
+                          'm22_18'=m22_18,
+                          'm74_18'=m74_18,
+                          'm88_18'=m88_18,
+                          'm50_18'=m50_18,
+                          'm58_18'=m58_18,
+                          'm76_18'=m76_18,
+                          'm43_18'=m43_18,
+                          'm27_18'=m27_18,
+                          'm4_18'=m4_18,
+                          'm28_18'=m28_18,
+                          'm75_33'=m75_33,
+                          'm84_33'=m84_33,
+                          'm29_33'=m29_33,
+                          'm86_33'=m86_33,
+                          'm73_33'=m73_33,
+                          'm65_33'=m65_33,
+                          'm22_33'=m22_33,
+                          'm74_33'=m74_33,
+                          'm88_33'=m88_33,
+                          'm50_33'=m50_33,
+                          'm58_33'=m58_33,
+                          'm76_33'=m76_33,
+                          'm43_33'=m43_33,
+                          'm27_33'=m27_33,
+                          'm4_33'=m4_33,
+                          'm28_33'=m28_33,
+                          'm75_8'=m75_8,
+                          'm84_8'=m84_8,
+                          'm29_8'=m29_8,
+                          'm86_8'=m86_8,
+                          'm73_8'=m73_8,
+                          'm65_8'=m65_8,
+                          'm22_8'=m22_8,
+                          'm74_8'=m74_8,
+                          'm88_8'=m88_8,
+                          'm50_8'=m50_8,
+                          'm58_8'=m58_8,
+                          'm76_8'=m76_8,
+                          'm43_8'=m43_8,
+                          'm27_8'=m27_8,
+                          'm4_8'=m4_8,
+                          'm28_8'=m28_8,
+                          'm75_3'=m75_3,
+                          'm84_3'=m84_3,
+                          'm29_3'=m29_3,
+                          'm86_3'=m86_3,
+                          'm73_3'=m73_3,
+                          'm65_3'=m65_3,
+                          'm22_3'=m22_3,
+                          'm74_3'=m74_3,
+                          'm88_3'=m88_3,
+                          'm50_3'=m50_3,
+                          'm58_3'=m58_3,
+                          'm76_3'=m76_3,
+                          'm43_3'=m43_3,
+                          'm27_3'=m27_3,
+                          'm4_3'=m4_3,
+                          'm28_3'=m28_3,
+                          'm75_39'=m75_39,
+                          'm84_39'=m84_39,
+                          'm29_39'=m29_39,
+                          'm86_39'=m86_39,
+                          'm73_39'=m73_39,
+                          'm65_39'=m65_39,
+                          'm22_39'=m22_39,
+                          'm74_39'=m74_39,
+                          'm88_39'=m88_39,
+                          'm50_39'=m50_39,
+                          'm58_39'=m58_39,
+                          'm76_39'=m76_39,
+                          'm43_39'=m43_39,
+                          'm27_39'=m27_39,
+                          'm4_39'=m4_39,
+                          'm28_39'=m28_39,
+                          'm75_17'=m75_17,
+                          'm84_17'=m84_17,
+                          'm29_17'=m29_17,
+                          'm86_17'=m86_17,
+                          'm73_17'=m73_17,
+                          'm65_17'=m65_17,
+                          'm22_17'=m22_17,
+                          'm74_17'=m74_17,
+                          'm88_17'=m88_17,
+                          'm50_17'=m50_17,
+                          'm58_17'=m58_17,
+                          'm76_17'=m76_17,
+                          'm43_17'=m43_17,
+                          'm27_17'=m27_17,
+                          'm4_17'=m4_17,
+                          'm28_17'=m28_17,
+                          'm75_27'=m75_27,
+                          'm84_27'=m84_27,
+                          'm29_27'=m29_27,
+                          'm86_27'=m86_27,
+                          'm73_27'=m73_27,
+                          'm65_27'=m65_27,
+                          'm22_27'=m22_27,
+                          'm74_27'=m74_27,
+                          'm88_27'=m88_27,
+                          'm50_27'=m50_27,
+                          'm58_27'=m58_27,
+                          'm76_27'=m76_27,
+                          'm43_27'=m43_27,
+                          'm27_27'=m27_27,
+                          'm4_27'=m4_27,
+                          'm28_27'=m28_27,
+                          'm75_26'=m75_26,
+                          'm84_26'=m84_26,
+                          'm29_26'=m29_26,
+                          'm86_26'=m86_26,
+                          'm73_26'=m73_26,
+                          'm65_26'=m65_26,
+                          'm22_26'=m22_26,
+                          'm74_26'=m74_26,
+                          'm88_26'=m88_26,
+                          'm50_26'=m50_26,
+                          'm58_26'=m58_26,
+                          'm76_26'=m76_26,
+                          'm43_26'=m43_26,
+                          'm27_26'=m27_26,
+                          'm4_26'=m4_26,
+                          'm28_26'=m28_26,
+                          'm75_16'=m75_16,
+                          'm84_16'=m84_16,
+                          'm29_16'=m29_16,
+                          'm86_16'=m86_16,
+                          'm73_16'=m73_16,
+                          'm65_16'=m65_16,
+                          'm22_16'=m22_16,
+                          'm74_16'=m74_16,
+                          'm88_16'=m88_16,
+                          'm50_16'=m50_16,
+                          'm58_16'=m58_16,
+                          'm76_16'=m76_16,
+                          'm43_16'=m43_16,
+                          'm27_16'=m27_16,
+                          'm4_16'=m4_16,
+                          'm28_16'=m28_16)
+
+wtf_aictab_best<-modSel(wtf_models_best)
+wtf_aictab_best
+
+wtf_aictable_best<-as(wtf_aictab_best, "data.frame")[,c("model", "formula", "nPars", "n", "AIC", "delta", "AICwt", "cumltvWt")]
+wtf_aictable_best<-data.frame(wtf_aictable_best[,1:3], round(wtf_aictable_best[,4:7],2 ))
+write.csv(wtf_aictable_best, "wtf_aictable_best.csv" , row.names = FALSE)                          
+
+##best models
+
+m75_28
+m75_22
+m75_32
+m75_40
+m84_28
+
+
+##p variables to be tested: 
+###had_rained
+###night
+###wind_speed
+###humidity
+###temperature
+###was_raining
+
+###psi variables to be tested
+###aquatic_veg
+###wt_roadkms_per_km2
+###stream
+###pct_wetland_cover
+
+
+
+#                                                         PREDICTIONS####
+
+
+##**                                                Detection-level predictions*
+
+###had_rained prediction
+rain_to_pred<-c('had_rained','no_rain')
+
+rain_df<-data.frame(had_rained=rain_to_pred,
+                    night='night',
+                    wind_speed=11.66,
+                    humidity=0.7404,
+                    temperature=12.74,
+                    was_raining='raining')
+
+pred_det_rain<-predict(m75_28,
+                       type='det',
+                       newdata=rain_df)
+
+pred_rain_results<-cbind(rain_to_pred,pred_det_rain)
+
+pred_rain_results
+
+#### det. 0.6723513 (0.6121489 0.7273708) [no rain] - 0.7398381 (0.6860684 0.7872540) [rain]
+
+###night prediction
+night_to_pred<-c('night','day')
+
+night_df<-data.frame(night=night_to_pred,
+                     had_rained='had_rained',
+                     wind_speed=11.66,
+                     humidity=0.7404,
+                     temperature=12.74,
+                     was_raining='raining')
+
+pred_det_night<-predict(m75_28,
+                        type='det',
+                        newdata=night_df)
+
+pred_night_results<-cbind(night_to_pred,pred_det_night)
+
+pred_night_results
+
+#### det. 0.1579858 (0.1028240 0.2349894 [day] - 0.7398381 (0.6860684 0.7872540) [night]
+
+####wind_speed prediction
+wind_seq<-seq(from=0,to=70,length.out=100)
+
+wind_seq_df<-data.frame(wind_speed=wind_seq,
+                        had_rained='had_rained',
+                        night='night',
+                        humidity=0.7404,
+                        temperature=12.74,
+                        was_raining='raining') 
+
+pred_det_wind<-predict(m75_28,
+                       type='det',
+                       newdata=wind_seq_df)
+
+pred_wind_results<-cbind(wind_seq_df,pred_det_wind)
+
+pred_wind_results
+
+#### det. 0.4601966 (0.2223686 0.7176458) [70kmh] - 0.7834520 (0.7179348 0.8372020) [0kmh]
+
+###humidity prediction
+hum_seq<-seq(from=0.09,to=1,length.out=100)
+
+hum_seq_df<-data.frame(humidity=hum_seq,
+                       had_rained='had_rained',
+                       night='night',
+                       wind_speed=11.66,
+                       temperature=12.74,
+                       was_raining='raining') 
+
+pred_det_hum<-predict(m75_22,
+                      type='det',
+                      newdata=hum_seq_df)
+
+pred_hum_results<-cbind(hum_seq_df,pred_det_hum)
+
+pred_hum_results
+
+#### det. 0.5196023 (0.3019482 0.7300619) [0%] - 0.7955540 (0.7214196 0.8539540) [100%]
+
+###temperature prediction
+temp_seq<-seq(from=4.5,to=24,length.out=100)
+
+temp_seq_df<-data.frame(temperature=temp_seq,
+                        had_rained='had_rained',
+                        night='night',
+                        wind_speed=11.66,
+                        humidity=0.7404,
+                        was_raining='raining') 
+
+pred_det_temp<-predict(m75_32,
+                       type='det',
+                       newdata=temp_seq_df)
+
+pred_temp_results<-cbind(temp_seq_df,pred_det_temp)
+
+pred_temp_results
+
+#### det. 0.6232468 (0.4758806 0.7508700) [4.5c] - 0.8001353 (0.6244098 0.9060194) [24c]
+
+###was_raining prediction
+raining_to_pred<-c('raining','not_raining')
+
+raining_df<-data.frame(raining=rain_to_pred,
+                       had_rained='had_rained',
+                       night='night',
+                       wind_speed=11.66,
+                       humidity=0.7404,
+                       temperature=12.74)
+
+pred_det_raining<-predict(m75_40,
+                       type='det',
+                       newdata=rain_df)
+
+pred_raining_results<-cbind(raining_to_pred,pred_det_raining)
+
+pred_raining_results
+
+#### det. was the same - 0.7778585 (0.6670396 0.8595592)
+
+
+##**                                                Site-level predictions*
+
+###aquatic_veg prediction
+aqveg_seq<-seq(from=0,to=3,length.out=100)
+
+aqveg_seq_df<-data.frame(aquatic_veg=aqveg_seq,
+                         wt_roadkms_per_km2=11.08,
+                         stream='stream',
+                         pct_wetland_cover=5.505) 
+
+pred_det_aqveg<-predict(m75_28,
+                        type='state',
+                        newdata=aqveg_seq_df)
+
+pred_aqveg_results<-cbind(aqveg_seq_df,pred_det_aqveg)
+
+pred_aqveg_results
+
+#### occu. 0.2575963  (0.1873277 0.3430953) [0] - 0.5909950  (0.2701141 0.8494385) [300]
+
+###wt_roadkms_per_km2 prediction
+rdkm_seq<-seq(from=0,to=28,length.out=100)
+
+rdkm_seq_df<-data.frame(wt_roadkms_per_km2=rdkm_seq,
+                        aquatic_veg=0.5272,
+                        stream='stream',
+                        pct_wetland_cover=5.505)
+
+pred_det_rdkm<-predict(m75_28,
+                       type='state',
+                       newdata=rdkm_seq_df)
+
+pred_rdkm_results<-cbind(rdkm_seq_df,pred_det_rdkm)
+
+pred_rdkm_results
+
+#### occu. 0.08699421 (0.04305429 0.1679094) [28] - 0.55049982  (0.42128898 0.6732376) [0]
+
+###stream prediction
+stream_to_pred<-c('stream','pond')
+
+stream_df<-data.frame(stream=stream_to_pred,
+                    aquatic_veg=0.5272,
+                    wt_roadkms_per_km2=11.08,
+                    pct_wetland_cover=5.505)
+
+pred_det_stream<-predict(m75_28,
+                       type='state',
+                       newdata=stream_df)
+
+pred_stream_results<-cbind(stream_to_pred,pred_det_stream)
+pred_stream_results
+
+#### occu. 0.3083591 (0.2420461 0.3836440) [stream] - 0.4070652  (0.3524532 0.4640748) [pond]
+
+###pct_wetland_cover prediction
+wtlnd_seq<-seq(from=0,to=100,length.out=100)
+
+wtlnd_seq_df<-data.frame(pct_wetland_cover=wtlnd_seq,
+                        aaquatic_veg=0.5272,
+                        wt_roadkms_per_km2=11.08,
+                        stream='stream')
+
+pred_det_wtlnd<-predict(m84_28,
+                       type='state',
+                       newdata=wtlnd_seq_df)
+
+pred_wtlnd_results<-cbind(wtlnd_seq_df,pred_det_wtlnd)
+
+pred_wtlnd_results
+
+#### occu. 0.31628297 (00.24772738 0.3938771) [0] - 0.07994468 (0.01333279 0.3584515) [100]
+
+
+
+#PLOTS ####
+
+##**                                                Detection Plots*
+
+
+
+###had_rained plot
+wtf_rain_bp<-barplot(pred_rain_results$Predicted,
+                      space=0.2,
+                      names=c('Had rained', 'Had not rained'),
+                      ylim=c(0,0.9),
+                      ylab='Detection probability (%)',
+                      main=expression("Effect of prior rain on detection probability of" ~ italic("Litoria verreauxii") ~""),
+                      mgp=c(2.75,0.8,0),
+                      lwd=2)
+arrows(wtf_rain_bp,pred_rain_results$lower,
+       wtf_rain_bp,pred_rain_results$upper,
+       code=3,
+       angle=90,
+       length=0.1,
+       lwd=2)+
+  abline(0,0,
+         lwd=2)
+
+###night plot
+wtf_night_bp<-barplot(pred_night_results$Predicted,
+                       space=0.2,
+                       names=c('Night','Day'),
+                       ylim=c(0,1),
+                       ylab='Detection probability (%)',
+                       main=expression("Effect of time of day on detection probability of" ~ italic("Litoria verreauxii") ~""),
+                       mgp=c(2.75,0.8,0),
+                       lwd=2)
+arrows(wtf_night_bp,pred_night_results$lower,
+       wtf_night_bp,pred_night_results$upper,
+       code=3,
+       angle=90,
+       length=0.1,
+       lwd=2)+
+  abline(0,0,
+         lwd=2)
+
+###wind_speed plot
+plot(x=pred_wind_results$wind_speed,
+     y=pred_wind_results$Predicted,
+     type='l',
+     xlab='Wind speed (km/h)',
+     ylab='Detection probability (%)',
+     main=expression("Effect of wind speed on detection probability of" ~ italic("Litoria verreauxii") ~""),
+     ylim=c(0,1),
+     xlim=c(0,70),
+     lwd=1.7)+
+  lines(x=pred_wind_results$wind_speed,
+        y=pred_wind_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_wind_results$wind_speed,
+        y=pred_wind_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+###humidity plot
+plot(x=pred_hum_results$humidity, 
+     y=pred_hum_results$Predicted,
+     type='l',
+     xlab='Humidity (%)',
+     ylab='Detection probability (%)',
+     main=expression("Effect of humidity on detection probability of" ~ italic("Litoria verreauxii") ~""),
+     ylim=c(0,1),
+     xlim=c(0,1),
+     lwd=1.7)+
+  lines(x=pred_hum_results$humidity,
+        y=pred_hum_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_hum_results$humidity,
+        y=pred_hum_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+###temperature plot
+plot(x=pred_temp_results$temperature,
+     y=pred_temp_results$Predicted,
+     type='l',
+     xlab='Degrees (°c)',
+     ylab='Detection probability (%)',
+     main=expression("Effect of temperature on detection probability of" ~ italic("Litoria verreauxii") ~""),
+     ylim=c(0,1),
+     xlim=c(4,25),
+     lwd=1.7)+
+  lines(x=pred_temp_results$temperature,
+        y=pred_temp_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_temp_results$temperature,
+        y=pred_temp_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+###was_raining plot
+wtf_raining_bp<-barplot(pred_raining_results$Predicted,
+                       space=0.2,
+                       names=c('Raining','Not raining'),
+                       ylim=c(0,1),
+                       ylab='Detection probability (%)',
+                       main=expression("Effect of active rain on detection probability of" ~ italic("Litoria verreauxii") ~""),
+                       mgp=c(2.75,0.8,0),
+                       lwd=2)
+arrows(wtf_raining_bp,pred_raining_results$lower,
+       wtf_raining_bp,pred_raining_results$upper,
+       code=3,
+       angle=90,
+       length=0.1,
+       lwd=2)+
+  abline(0,0,
+         lwd=2)
+
+
+##**                                                Occupancy Plots*
+
+###aquatic_veg plot
+plot(x=pred_aqveg_results$aquatic_veg, 
+     y=pred_aqveg_results$Predicted,
+     type='l',
+     xlab='Acquatic vegetation cover (%)',
+     ylab='Occupancy probability (%)',
+     main=expression("Effect of aquatic vegetation on occupancy probability of" ~ italic("Litoria verreauxii") ~""),
+     ylim=c(0,1),
+     xlim=c(0,3),
+     lwd=1.7)+
+  lines(x=pred_aqveg_results$aquatic_veg,
+        y=pred_aqveg_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_aqveg_results$aquatic_veg,
+        y=pred_aqveg_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+###wt_roadkms_per_km2 plot
+plot(x=pred_rdkm_results$wt_roadkms_per_km2, 
+     y=pred_rdkm_results$Predicted,
+     type='l',
+     xlab='wt_roadkms_per_km2',
+     ylab='Occupancy probability (%)',
+     main=expression("Effect of wt_roadkms_per_km2 on occupancy probability of" ~ italic("Litoria verreauxii") ~""),
+     ylim=c(0,0.8),
+     xlim=c(0,30),
+     lwd=1.7)+
+  lines(x=pred_rdkm_results$wt_roadkms_per_km2,
+        y=pred_rdkm_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_rdkm_results$wt_roadkms_per_km2,
+        y=pred_rdkm_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+###stream plot
+wtf_stream_bp<-barplot(pred_stream_results$Predicted,
+                      space=0.2,
+                      names=c('Lotic','Lentic'),
+                      ylim=c(0,0.5),
+                      ylab='Detection probability (%)',
+                      main=expression("Effect of water movement on detection probability of" ~ italic("Litoria verreauxii") ~""),
+                      mgp=c(2.75,0.8,0),
+                      lwd=2)
+arrows(wtf_stream_bp,pred_stream_results$lower,
+       wtf_stream_bp,pred_stream_results$upper,
+       code=3,
+       angle=90,
+       length=0.1,
+       lwd=2)+
+  abline(0,0,
+         lwd=2)
+
+###pct_wetland_cover plot
+plot(x=pred_wtlnd_results$pct_wetland_cover, 
+     y=pred_wtlnd_results$Predicted,
+     type='l',
+     xlab='Wetland coverage (%)',
+     ylab='Occupancy probability (%)',
+     main=expression("Effect of wetland coverage on occupancy probability of" ~ italic("Litoria verreauxii") ~""),
+     ylim=c(0,0.5),
+     xlim=c(0,100),
+     lwd=1.7)+
+  lines(x=pred_wtlnd_results$pct_wetland_cover,
+        y=pred_wtlnd_results$upper,
+        lty=3,
+        col='darkseagreen',
+        lwd=2)+
+  lines(x=pred_wtlnd_results$pct_wetland_cover,
+        y=pred_wtlnd_results$lower,
+        lty=3,
+        col='tomato3',
+        lwd=2)
+
+
+
